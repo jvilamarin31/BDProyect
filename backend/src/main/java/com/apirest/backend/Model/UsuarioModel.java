@@ -4,8 +4,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.apirest.backend.ENUM.RolUsuario;
-import com.apirest.backend.ENUM.TipoUsuario;
+import com.apirest.backend.Model.ENUM.RolUsuario;
+import com.apirest.backend.Model.ENUM.TipoUsuario;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
