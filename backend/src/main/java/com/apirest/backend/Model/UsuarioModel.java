@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Document("Usuarios")
+@Document("Usuario")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,10 +22,10 @@ public class UsuarioModel {
     private RolUsuario rol;
     private String nombreCompleto;
     private String tipoDocumento;
-    private int numeroDocumento;
+    private long numeroDocumento;
     private String email;
     private String contraseña;
-    private int telefono;;
+    private long telefono;
     private DireccionUnidadUsuario direccionUnidad;
     
 }
