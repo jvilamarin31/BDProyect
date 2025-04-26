@@ -17,9 +17,7 @@ import lombok.NoArgsConstructor;
 public class Respuesta {
     @Id
     private ObjectId id;
-    @Id
     private ObjectId solicitudId;
-    @Id
     private ObjectId usuarioId;
     private String oficioPDF;
     private String comentario;
