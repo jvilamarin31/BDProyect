@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Administradores {
+public class AdministradoresModel {
     @Id
     private ObjectId idAdministrador;
     private EstadoAdministradores estado;
