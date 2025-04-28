@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Respuesta {
+public class RespuestaModel {
     @Id
     private ObjectId id;
     private ObjectId solicitudId;
     private ObjectId usuarioId;
     private String oficioPDF;
     private String comentario;
-    private int calificacionUsuario;
+    private Integer calificacionUsuario;
     private ArrayList<ReplicasRespuesta> replicas = new ArrayList<>();
     
 }

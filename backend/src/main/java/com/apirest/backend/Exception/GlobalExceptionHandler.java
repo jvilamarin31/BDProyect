@@ -2,8 +2,11 @@ package com.apirest.backend.Exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<String> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex) {
@@ -25,8 +28,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST); // 400 Bad Request
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<String> handleInvalidFormat(HttpMessageNotReadableException ex) {
+        String detalle = ex.getMostSpecificCause().getMessage();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato inválido en la solicitud: " + detalle);
+    }
+
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
-        return new ResponseEntity<>("No se pudo crear el usuario. Intenta de nuevo.", HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>("Intenta de nuevo.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
