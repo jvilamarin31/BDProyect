@@ -20,6 +20,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND); // 404 Not Found
     }
 
+    @ExceptionHandler(InvalidUserConfigurationException.class)
+    public ResponseEntity<String> handleInvalidUserConfigurationException(InvalidUserConfigurationException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST); // 400 Bad Request
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
         return new ResponseEntity<>("No se pudo crear el usuario. Intenta de nuevo.", HttpStatus.INTERNAL_SERVER_ERROR);

@@ -23,7 +23,7 @@ public class SolicitudModel {
     @Id
     private ObjectId id;
     private TipoSolicitud tipo;
-    private ClasificacionSolicitud calificacion;
+    private ClasificacionSolicitud clasificacion;
     private String descripcionDetallada;
     private UsuarioSolicitud usuario;
     private Instant fechaHoraCreacion;
