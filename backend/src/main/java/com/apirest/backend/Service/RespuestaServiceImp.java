@@ -2,11 +2,14 @@ package com.apirest.backend.Service;
 
 import java.util.Optional;
 
+
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.apirest.backend.Exception.InvalidUserRoleException;
 import com.apirest.backend.Exception.ResourceNotFoundException;
+import com.apirest.backend.Model.ReplicasRespuesta;
 import com.apirest.backend.Model.RespuestaModel;
 import com.apirest.backend.Model.SolicitudModel;
 import com.apirest.backend.Model.UsuarioModel;
@@ -51,9 +54,41 @@ public class RespuestaServiceImp implements IRespuestaService{
         return respuestaRepository.save(respuesta);
     }
 
-            // SolicitudModel solicitud = solicitudExiste.get();
+    @Override
+    public RespuestaModel crearReplica(ObjectId id, ReplicasRespuesta replica) {
+        Optional<RespuestaModel> respuestaExiste = respuestaRepository.findById(id);
+        if (!respuestaExiste.isPresent()) {
+            throw new ResourceNotFoundException("La respuesta no existe.");
+        }
+        
+        RespuestaModel respuestaActualizada = respuestaExiste.get();
 
-        // if (usuario.getId() != solicitud.getUsuario().getUsuarioId()){
-        //     throw new InvalidUserRoleException("El usuario ingresado no corresponde al usuario que creo la solicitud.");
-        // }
+        Optional<UsuarioModel> usuarioExiste = usuarioRepository.findById(replica.getUsuarioId());
+        if (!usuarioExiste.isPresent()) {
+            throw new ResourceNotFoundException("El usuario no existe.");
+        }
+
+        UsuarioModel usuario = usuarioExiste.get();
+        if (usuario.getTipo() != TipoUsuario.usuario) {
+            throw new InvalidUserRoleException("Solo un usuario puede hacer una replica.");
+        }
+
+        Optional<SolicitudModel> solicitudExiste = solicitudRepository.findById(respuestaActualizada.getSolicitudId());
+        SolicitudModel solicitud = solicitudExiste.get();
+
+        if ( !solicitud.getUsuario().getUsuarioId().equals(replica.getUsuarioId()) ) {
+            throw new InvalidUserRoleException("Solo el usuario que hizo la solicitud puede hacer una replica.");
+        }
+
+        if (replica.getComentarioAdmin() != null) {
+            throw new InvalidUserRoleException("Un usuario no puede hacer un comentario de administrador.");
+        }
+
+
+        respuestaActualizada.getReplicas().add(replica);
+    
+        return respuestaRepository.save(respuestaActualizada);
+
+    }
+         
 }
