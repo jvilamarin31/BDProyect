@@ -13,6 +13,7 @@ import com.apirest.backend.Model.ReplicasRespuesta;
 import com.apirest.backend.Model.RespuestaModel;
 import com.apirest.backend.Model.SolicitudModel;
 import com.apirest.backend.Model.UsuarioModel;
+import com.apirest.backend.Model.ENUM.EstadoSolicitud;
 import com.apirest.backend.Model.ENUM.TipoUsuario;
 import com.apirest.backend.Repository.IRespuestaRepository;
 import com.apirest.backend.Repository.ISolicitudRepository;
@@ -52,9 +53,10 @@ public class RespuestaServiceImp implements IRespuestaService{
 
         }
         SolicitudModel solicitud = solicitudExiste.get();
-        if (solicitud.getUsuario().toString().equals(("681fbc5426dd1f4d7f0d0e50"))) {
-            throw new InvalidUserRoleException("Un administrador no le puede mandar una respuesta a un usuario anonimo.");
+        if (solicitud.getUsuario().getNombreCompleto()== "Usuario Anónimo"){
+            throw new InvalidUserRoleException("Un administrador no puede responder a una solicitud de un usuario anónimo.");
         }
+        
         return respuestaRepository.save(respuesta);
     }
 
@@ -97,7 +99,7 @@ public class RespuestaServiceImp implements IRespuestaService{
 
 
         respuestaActualizada.getReplicas().add(replica);
-    
+        solicitud.setEstado(EstadoSolicitud.reabierta);
         return respuestaRepository.save(respuestaActualizada);
 
     }

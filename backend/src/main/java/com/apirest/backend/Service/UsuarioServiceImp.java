@@ -31,7 +31,13 @@ public class UsuarioServiceImp implements IUsuarioService{
             if ((usuario.getRol() == null)||(usuario.getDireccionUnidad() == null)){
                 throw new InvalidUserConfigurationException("Un usuario registrado debe tener rol y dirección de unidad.");
             }
-        } 
+        } else if (usuario.getTipo()==TipoUsuario.anonimo){
+            throw new InvalidUserConfigurationException("Un usuario no puede crear un usuario anónimo, para eso podra usar el usuario anonimo ya creado por defecto.");
+        }//Validación para anonimo
+        if (usuario.getNombreCompleto()=="Usuario Anónimo") {
+            throw new InvalidUserConfigurationException("El nombre completo no puede ser 'Usuario Anónimo', ese nombre ya esta reservado para el usuario anonimo por defecto.");  
+        }//Validación para anonimo
+         
 
         return usuarioRepository.save(usuario);   
     }
