@@ -3,6 +3,7 @@ package com.apirest.backend.Service;
 import java.time.Instant;
 import java.util.Optional;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,5 +53,23 @@ public class SolicitudServiceImp implements ISolicitudService{
         }
         return solicitudRepository.save(solicitud);
 
+    }
+    @Override
+    public SolicitudModel agregarEvidencia(ObjectId idSolicitud, EvidenciasSolicitud evidencia) {
+        Optional<SolicitudModel> solicitudExiste = solicitudRepository.findById(idSolicitud);
+        if (!solicitudExiste.isPresent()){
+            throw new ResourceNotFoundException("La solicitud no existe.");
+        }
+        SolicitudModel solicitud = solicitudExiste.get();
+        if (solicitud.getEstado() == EstadoSolicitud.cerrada) {
+            throw new InvalidUserRoleException("No se pueden agregar evidencias a una solicitud que este en estado 'cerrada'.");
+        } else if (solicitud.getEstado() == EstadoSolicitud.resuelta) {
+            throw new InvalidUserRoleException("No se pueden agregar evidencias a una solicitud que este en estado 'resuelta'.");
+        }
+        evidencia.setFechaHora(Instant.now());
+        solicitud.getEvidencias().add(evidencia);
+        solicitud.setFechaUltimaActualizacion(Instant.now());
+        return solicitudRepository.save(solicitud);
+        
     }
 }

@@ -95,7 +95,11 @@ public class RespuestaServiceImp implements IRespuestaService{
             if (ultimaReplica.getComentarioAdmin()== null || ultimaReplica.getComentarioAdmin().isEmpty()) {
                 throw new InvalidUserRoleException("El usuario no puede hacer una replica si el administrador no ha respondido.");
             }
-        }   
+        }
+        
+        if (solicitud.getEstado() == EstadoSolicitud.cerrada) {
+            throw new InvalidUserRoleException("No se puede hacer una replica a una solicitud que un administrador cerro de manera definitiva.");
+        }
 
 
         respuestaActualizada.getReplicas().add(replica);
