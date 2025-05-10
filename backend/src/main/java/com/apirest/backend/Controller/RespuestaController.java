@@ -30,4 +30,9 @@ public class RespuestaController {
     public ResponseEntity<RespuestaModel> crearReplica(@PathVariable ObjectId id, @RequestBody ReplicasRespuesta replica){
         return new ResponseEntity<RespuestaModel> (respuestaService.crearReplica(id, replica),HttpStatus.OK);
     }
+
+    @PutMapping("/responderReplica/{id}")
+    public ResponseEntity<RespuestaModel> responderReplica(@PathVariable ObjectId id, @RequestBody ReplicasRespuesta replica){
+        return new ResponseEntity<RespuestaModel> (respuestaService.responderReplica(id, replica),HttpStatus.OK);
+    }
 }

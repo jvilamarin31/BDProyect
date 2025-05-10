@@ -6,6 +6,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.apirest.backend.Model.ENUM.RolUsuario;
 import com.apirest.backend.Model.ENUM.TipoUsuario;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UsuarioModel {
     @Id
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
     private TipoUsuario tipo;
     private RolUsuario rol;

@@ -84,11 +84,59 @@ public class RespuestaServiceImp implements IRespuestaService{
             throw new InvalidUserRoleException("Un usuario no puede hacer un comentario de administrador.");
         }
 
+        if (respuestaActualizada.getReplicas() != null && !respuestaActualizada.getReplicas().isEmpty()) {
+            ReplicasRespuesta ultimaReplica = respuestaActualizada.getReplicas().get(respuestaActualizada.getReplicas().size() - 1);
+            if (ultimaReplica.getComentarioAdmin()== null || ultimaReplica.getComentarioAdmin().isEmpty()) {
+                throw new InvalidUserRoleException("El usuario no puede hacer una replica si el administrador no ha respondido.");
+            }
+        }   
+
 
         respuestaActualizada.getReplicas().add(replica);
     
         return respuestaRepository.save(respuestaActualizada);
 
+    }
+
+    @Override
+    public RespuestaModel responderReplica(ObjectId id, ReplicasRespuesta replica){
+        Optional<RespuestaModel> respuestaExiste = respuestaRepository.findById(id);
+        if (!respuestaExiste.isPresent()) {
+            throw new ResourceNotFoundException("El id: " + id + " no corresponde a ninguna respuesta existente.");
+        }
+        RespuestaModel respuesta = respuestaExiste.get();
+
+        if (replica.getComentarioAdmin() == null || replica.getComentarioAdmin().isEmpty()) {
+            throw new InvalidUserRoleException("El comentario de administrador no puede estar vacio.");
+        }
+        
+        if (replica.getUsuarioId() == null) {
+            throw new InvalidUserRoleException("El id del usuario no puede estar vacio");
+        }
+
+        if (respuesta.getReplicas() == null || respuesta.getReplicas().isEmpty()) {
+            throw new InvalidUserRoleException("No hay replicas para responder.");
+        }
+        
+        ReplicasRespuesta ultimaReplica = respuesta.getReplicas().get(respuesta.getReplicas().size() - 1);
+        if (ultimaReplica.getComentarioAdmin() != null && !ultimaReplica.getComentarioAdmin().isEmpty()) {
+            throw new InvalidUserRoleException("No se puede responder a una replica que ya tiene un comentario de administrador.");
+        }
+
+        Optional<UsuarioModel> usuarioExiste = usuarioRepository.findById(replica.getUsuarioId());
+        if (!usuarioExiste.isPresent()) {
+            throw new ResourceNotFoundException("El usuario no existe.");
+        }
+        // UsuarioModel usuario = usuarioExiste.get();
+        // if (usuario.getTipo() != TipoUsuario.administrador) {
+        //     throw new InvalidUserRoleException("Solo un administrador puede responder a una replica.");
+        // } Este metodo es por si cambiamos de idea y queremos que cualquier admin pueda responder las replicas
+
+        if (!respuesta.getUsuarioId().equals(replica.getUsuarioId())) {
+            throw new InvalidUserRoleException("Solo el mismo administrador que creo la respuesta puede responder las replicas");
+        } //Arrelglar
+        ultimaReplica.setComentarioAdmin(replica.getComentarioAdmin());
+        return respuestaRepository.save(respuesta);
     }
          
 }

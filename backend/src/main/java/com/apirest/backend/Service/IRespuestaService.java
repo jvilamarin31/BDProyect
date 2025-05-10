@@ -8,4 +8,5 @@ import com.apirest.backend.Model.RespuestaModel;
 public interface IRespuestaService {
     public RespuestaModel crearRespuesta(RespuestaModel respuesta);
     public RespuestaModel crearReplica(ObjectId id, ReplicasRespuesta replica);
+    public RespuestaModel responderReplica(ObjectId id, ReplicasRespuesta replica);
 }
