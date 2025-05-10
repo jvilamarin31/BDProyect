@@ -37,8 +37,8 @@ public class RespuestaServiceImp implements IRespuestaService{
         if (!usuarioExiste.isPresent()){
             throw new ResourceNotFoundException("el usuario no existe.");
         }
-        UsuarioModel usuario = usuarioExiste.get(); 
-        if (usuario.getTipo() != TipoUsuario.administrador){
+        UsuarioModel administrador = usuarioExiste.get(); 
+        if (administrador.getTipo() != TipoUsuario.administrador){
             throw new InvalidUserRoleException("Solo un administrador puede generar una respuesta.");
         }
 
@@ -50,6 +50,10 @@ public class RespuestaServiceImp implements IRespuestaService{
         if ((respuesta.getCalificacionUsuario() != null) || (!respuesta.getReplicas().isEmpty() && respuesta.getReplicas() != null)){
             throw new InvalidUserRoleException("Un administrador no puede calificar ni hacer replicas");
 
+        }
+        SolicitudModel solicitud = solicitudExiste.get();
+        if (solicitud.getUsuario().toString().equals(("681fbc5426dd1f4d7f0d0e50"))) {
+            throw new InvalidUserRoleException("Un administrador no le puede mandar una respuesta a un usuario anonimo.");
         }
         return respuestaRepository.save(respuesta);
     }

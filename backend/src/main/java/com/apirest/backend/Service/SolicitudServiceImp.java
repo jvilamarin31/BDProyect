@@ -28,21 +28,29 @@ public class SolicitudServiceImp implements ISolicitudService{
     @Override
     public SolicitudModel crearSolicitud(SolicitudModel solicitud){
         Optional<UsuarioModel> usuarioExistente = usuarioRepository.findById(solicitud.getUsuario().getUsuarioId());
-        if(usuarioExistente.isPresent()){
-            if(usuarioExistente.get().getTipo()==TipoUsuario.usuario||usuarioExistente.get().getTipo()==TipoUsuario.anonimo){
-                solicitud.setFechaHoraCreacion(Instant.now());
-                solicitud.setEstado(EstadoSolicitud.radicada);
-                if(solicitud.getEvidencias() != null){
-                    for(EvidenciasSolicitud evidencias : solicitud.getEvidencias()){
-                        evidencias.setFechaHora(Instant.now());
-                    }
-                }
-                return solicitudRepository.save(solicitud);
-            } else{
-                throw new InvalidUserRoleException("Un administrador no puede crear una solicitud.");
-            }
-        } else{
+        if (!usuarioExistente.isPresent()){
             throw new ResourceNotFoundException("El usuario no existe.");
         }
+        UsuarioModel usuario = usuarioExistente.get();
+
+        if (usuario.getTipo() == TipoUsuario.administrador){
+            throw new InvalidUserRoleException("Un administrador no puede crear una solicitud.");
+        }
+
+        solicitud.setFechaHoraCreacion(Instant.now());
+        solicitud.setEstado(EstadoSolicitud.radicada);
+
+        if (usuario.getTipo() == TipoUsuario.anonimo){
+
+            solicitud.getUsuario().setNombreCompleto(usuario.getNombreCompleto());
+        }
+
+        if (solicitud.getEvidencias() != null && !solicitud.getEvidencias().isEmpty()) {
+            for (EvidenciasSolicitud evidencia : solicitud.getEvidencias()) {
+                evidencia.setFechaHora(Instant.now());
+            }
+        }
+        return solicitudRepository.save(solicitud);
+
     }
 }
