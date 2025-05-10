@@ -134,7 +134,7 @@ public class RespuestaServiceImp implements IRespuestaService{
 
         if (!respuesta.getUsuarioId().equals(replica.getUsuarioId())) {
             throw new InvalidUserRoleException("Solo el mismo administrador que creo la respuesta puede responder las replicas");
-        } //Arrelglar
+        }
         ultimaReplica.setComentarioAdmin(replica.getComentarioAdmin());
         return respuestaRepository.save(respuesta);
     }
