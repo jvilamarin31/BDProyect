@@ -7,19 +7,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.apirest.backend.Model.AdministradoresModel;
-import com.apirest.backend.Service.IAdministradoresService;
+import com.apirest.backend.Model.AdministradorModel;
+import com.apirest.backend.Service.IAdministradorService;
 
 @RestController
-@RequestMapping("/api/administradores")
+@RequestMapping("/api/administrador")
 public class AdministradoresController {
 
     @Autowired
-    IAdministradoresService administradoresService;
+    IAdministradorService administradoresService;
     
     @RequestMapping("/registrar")
-    public ResponseEntity<AdministradoresModel> crearAdministradores(@RequestBody AdministradoresModel administradores) {
-        return new ResponseEntity<AdministradoresModel>(administradoresService.crearAdministradores(administradores), HttpStatus.CREATED);
+    public ResponseEntity<AdministradorModel> crearAdministradores(@RequestBody AdministradorModel administradores) {
+        return new ResponseEntity<AdministradorModel>(administradoresService.crearAdministradores(administradores), HttpStatus.CREATED);
     }
     
 }

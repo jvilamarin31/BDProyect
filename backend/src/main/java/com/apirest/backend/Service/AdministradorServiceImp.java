@@ -7,17 +7,17 @@ import org.springframework.stereotype.Service;
 
 import com.apirest.backend.Exception.InvalidUserRoleException;
 import com.apirest.backend.Exception.ResourceNotFoundException;
-import com.apirest.backend.Model.AdministradoresModel;
+import com.apirest.backend.Model.AdministradorModel;
 import com.apirest.backend.Model.UsuarioModel;
 import com.apirest.backend.Model.ENUM.TipoUsuario;
-import com.apirest.backend.Repository.IAdministradoresRepository;
+import com.apirest.backend.Repository.IAdministradorRepository;
 import com.apirest.backend.Repository.IUsuarioRepository;
 
 @Service
-public class AdministradoresServiceImp implements IAdministradoresService{
+public class AdministradorServiceImp implements IAdministradorService{
 
     @Autowired
-    IAdministradoresRepository administradoresRepository;
+    IAdministradorRepository administradoresRepository;
 
     @Autowired
     IUsuarioRepository usuarioRepository;
@@ -25,7 +25,7 @@ public class AdministradoresServiceImp implements IAdministradoresService{
     
 
     @Override
-    public AdministradoresModel crearAdministradores(AdministradoresModel administradores){
+    public AdministradorModel crearAdministradores(AdministradorModel administradores){
         Optional<UsuarioModel> usuarioOpcional = usuarioRepository.findById(administradores.getIdAdministrador());
         
         if((usuarioOpcional.isPresent())){

@@ -14,11 +14,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Document("Administradores")
+@Document("Administrador")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdministradoresModel {
+public class AdministradorModel {
     @Id
     private ObjectId id;
     private ObjectId idAdministrador;
