@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.apirest.backend.Exception.InvalidUserRoleException;
 import com.apirest.backend.Exception.ResourceNotFoundException;
@@ -56,6 +57,7 @@ public class SolicitudServiceImp implements ISolicitudService{
 
     }
     @Override
+    @Transactional
     public SolicitudModel agregarEvidencia(ObjectId idSolicitud, EvidenciasSolicitud evidencia) {
         Optional<SolicitudModel> solicitudExiste = solicitudRepository.findById(idSolicitud);
         if (!solicitudExiste.isPresent()){
