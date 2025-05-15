@@ -1,6 +1,7 @@
 package com.apirest.backend.Service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import org.bson.types.ObjectId;
@@ -71,5 +72,16 @@ public class SolicitudServiceImp implements ISolicitudService{
         solicitud.setFechaUltimaActualizacion(Instant.now());
         return solicitudRepository.save(solicitud);
         
+    }
+
+    @Override
+    public List<SolicitudModel> listarTodasSolicitudes() {
+        List<SolicitudModel> solicitudes = solicitudRepository.findAll();
+        return solicitudes;
+    }
+
+    @Override
+    public List<SolicitudModel> listarSolicitudesPorEstado(EstadoSolicitud estado){ 
+        return solicitudRepository.findByEstado(estado);
     }
 }

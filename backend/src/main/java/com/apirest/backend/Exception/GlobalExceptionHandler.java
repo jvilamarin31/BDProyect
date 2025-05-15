@@ -33,6 +33,11 @@ public class GlobalExceptionHandler {
         String detalle = ex.getMostSpecificCause().getMessage();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato inválido en la solicitud: " + detalle);
     }
+    
+    @ExceptionHandler(InvalidReplicaConfigurationException.class)
+    public ResponseEntity<String> handleInvalidUserRoleException(InvalidReplicaConfigurationException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST); // 400 Bad Request
+    }
 
 
     @ExceptionHandler(Exception.class)

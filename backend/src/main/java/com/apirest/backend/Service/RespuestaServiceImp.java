@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.apirest.backend.Exception.InvalidReplicaConfigurationException;
 import com.apirest.backend.Exception.InvalidUserRoleException;
 import com.apirest.backend.Exception.ResourceNotFoundException;
 import com.apirest.backend.Model.ReplicasRespuesta;
@@ -32,6 +33,7 @@ public class RespuestaServiceImp implements IRespuestaService{
     ISolicitudRepository solicitudRepository;
 
     @Override
+    @Transactional
     public RespuestaModel crearRespuesta(RespuestaModel respuesta){
         Optional<UsuarioModel> usuarioExiste = usuarioRepository.findById(respuesta.getUsuarioId());
         Optional<SolicitudModel> solicitudExiste = solicitudRepository.findById(respuesta.getSolicitudId());
@@ -57,6 +59,7 @@ public class RespuestaServiceImp implements IRespuestaService{
         if (solicitud.getUsuario().getNombreCompleto()== "Usuario Anónimo"){
             throw new InvalidUserRoleException("Un administrador no puede responder a una solicitud de un usuario anónimo.");
         }
+        solicitud.setEstado(EstadoSolicitud.resuelta);
         
         return respuestaRepository.save(respuesta);
     }
@@ -111,12 +114,20 @@ public class RespuestaServiceImp implements IRespuestaService{
     }
 
     @Override
+    @Transactional
     public RespuestaModel responderReplica(ObjectId idRespuesta, ReplicasRespuesta replica){
         Optional<RespuestaModel> respuestaExiste = respuestaRepository.findById(idRespuesta);
         if (!respuestaExiste.isPresent()) {
             throw new ResourceNotFoundException("El id: " + idRespuesta + " no corresponde a ninguna respuesta existente.");
         }
         RespuestaModel respuesta = respuestaExiste.get();
+
+        Optional<SolicitudModel> solicitudExiste = solicitudRepository.findById(respuesta.getSolicitudId());
+        if (!solicitudExiste.isPresent()) {
+            throw new ResourceNotFoundException("El id: " + respuesta.getSolicitudId() + " no corresponde a ninguna solicitud existente.");
+        }
+
+        SolicitudModel solicitud = solicitudExiste.get();
 
         if (replica.getComentarioAdmin() == null || replica.getComentarioAdmin().isEmpty()) {
             throw new InvalidUserRoleException("El comentario de administrador no puede estar vacio.");
@@ -148,6 +159,12 @@ public class RespuestaServiceImp implements IRespuestaService{
             throw new InvalidUserRoleException("Solo el mismo administrador que creo la respuesta puede responder las replicas");
         }
         ultimaReplica.setComentarioAdmin(replica.getComentarioAdmin());
+
+        if (replica.getEstado() == EstadoSolicitud.radicada || replica.getEstado() == EstadoSolicitud.reabierta){
+            throw new InvalidReplicaConfigurationException("El administrador solo puede cambiar el estado a 'enProceso', 'resuelta' o 'cerrada'. ");
+        }
+        solicitud.setEstado(replica.getEstado());
+
         return respuestaRepository.save(respuesta);
     }
          
