@@ -26,13 +26,13 @@ public class RespuestaController {
         return new ResponseEntity<RespuestaModel>(respuestaService.crearRespuesta(respuesta),HttpStatus.CREATED);
     }
 
-    @PutMapping("/registarReplica/{id}")
-    public ResponseEntity<RespuestaModel> crearReplica(@PathVariable ObjectId id, @RequestBody ReplicasRespuesta replica){
-        return new ResponseEntity<RespuestaModel> (respuestaService.crearReplica(id, replica),HttpStatus.OK);
+    @PutMapping("/registarReplica/{idRespuesta}")
+    public ResponseEntity<RespuestaModel> crearReplica(@PathVariable("idRespuesta") ObjectId idRespuesta, @RequestBody ReplicasRespuesta replica){
+        return new ResponseEntity<RespuestaModel> (respuestaService.crearReplica(idRespuesta, replica),HttpStatus.OK);
     }
 
-    @PutMapping("/responderReplica/{id}")
-    public ResponseEntity<RespuestaModel> responderReplica(@PathVariable ObjectId id, @RequestBody ReplicasRespuesta replica){
-        return new ResponseEntity<RespuestaModel> (respuestaService.responderReplica(id, replica),HttpStatus.OK);
+    @PutMapping("/responderReplica/{idRespuesta}")
+    public ResponseEntity<RespuestaModel> responderReplica(@PathVariable("idRespuesta") ObjectId idRespuesta, @RequestBody ReplicasRespuesta replica){
+        return new ResponseEntity<RespuestaModel> (respuestaService.responderReplica(idRespuesta, replica),HttpStatus.OK);
     }
 }

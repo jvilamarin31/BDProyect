@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.apirest.backend.Exception.InvalidUserRoleException;
 import com.apirest.backend.Exception.ResourceNotFoundException;
@@ -61,8 +62,9 @@ public class RespuestaServiceImp implements IRespuestaService{
     }
 
     @Override
-    public RespuestaModel crearReplica(ObjectId id, ReplicasRespuesta replica) {
-        Optional<RespuestaModel> respuestaExiste = respuestaRepository.findById(id);
+    @Transactional
+    public RespuestaModel crearReplica(ObjectId idRespuesta, ReplicasRespuesta replica) {
+        Optional<RespuestaModel> respuestaExiste = respuestaRepository.findById(idRespuesta);
         if (!respuestaExiste.isPresent()) {
             throw new ResourceNotFoundException("La respuesta no existe.");
         }
@@ -92,7 +94,7 @@ public class RespuestaServiceImp implements IRespuestaService{
 
         if (respuestaActualizada.getReplicas() != null && !respuestaActualizada.getReplicas().isEmpty()) {
             ReplicasRespuesta ultimaReplica = respuestaActualizada.getReplicas().get(respuestaActualizada.getReplicas().size() - 1);
-            if (ultimaReplica.getComentarioAdmin()== null || ultimaReplica.getComentarioAdmin().isEmpty()) {
+            if (ultimaReplica.getComentarioAdmin() != null && !ultimaReplica.getComentarioAdmin().isEmpty()) {
                 throw new InvalidUserRoleException("El usuario no puede hacer una replica si el administrador no ha respondido.");
             }
         }
@@ -109,10 +111,10 @@ public class RespuestaServiceImp implements IRespuestaService{
     }
 
     @Override
-    public RespuestaModel responderReplica(ObjectId id, ReplicasRespuesta replica){
-        Optional<RespuestaModel> respuestaExiste = respuestaRepository.findById(id);
+    public RespuestaModel responderReplica(ObjectId idRespuesta, ReplicasRespuesta replica){
+        Optional<RespuestaModel> respuestaExiste = respuestaRepository.findById(idRespuesta);
         if (!respuestaExiste.isPresent()) {
-            throw new ResourceNotFoundException("El id: " + id + " no corresponde a ninguna respuesta existente.");
+            throw new ResourceNotFoundException("El id: " + idRespuesta + " no corresponde a ninguna respuesta existente.");
         }
         RespuestaModel respuesta = respuestaExiste.get();
 
