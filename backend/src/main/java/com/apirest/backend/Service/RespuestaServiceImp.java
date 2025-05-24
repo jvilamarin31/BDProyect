@@ -1,5 +1,6 @@
 package com.apirest.backend.Service;
 
+import java.time.Instant;
 import java.util.Optional;
 
 
@@ -32,6 +33,9 @@ public class RespuestaServiceImp implements IRespuestaService{
     @Autowired
     ISolicitudRepository solicitudRepository;
 
+    @Autowired
+    ISolicitudService solicitudService;
+
     @Override
     @Transactional
     public RespuestaModel crearRespuesta(RespuestaModel respuesta){
@@ -60,6 +64,7 @@ public class RespuestaServiceImp implements IRespuestaService{
             throw new InvalidUserRoleException("Un administrador no puede responder a una solicitud de un usuario anónimo.");
         }
         solicitud.setEstado(EstadoSolicitud.resuelta);
+        solicitud.setFechaUltimaActualizacion(Instant.now());
         
         return respuestaRepository.save(respuesta);
     }
@@ -67,6 +72,8 @@ public class RespuestaServiceImp implements IRespuestaService{
     @Override
     @Transactional
     public RespuestaModel crearReplica(ObjectId idRespuesta, ReplicasRespuesta replica) {
+        solicitudService.actualizarEstadoSolicitudesResueltas(); //testear en postman
+
         Optional<RespuestaModel> respuestaExiste = respuestaRepository.findById(idRespuesta);
         if (!respuestaExiste.isPresent()) {
             throw new ResourceNotFoundException("La respuesta no existe.");
@@ -102,9 +109,11 @@ public class RespuestaServiceImp implements IRespuestaService{
             }
         }
         
+        //validación de solicitud
         if (solicitud.getEstado() == EstadoSolicitud.cerrada) {
             throw new InvalidUserRoleException("No se puede hacer una replica a una solicitud que un administrador cerro de manera definitiva.");
         }
+        
 
 
         respuestaActualizada.getReplicas().add(replica);
@@ -160,10 +169,11 @@ public class RespuestaServiceImp implements IRespuestaService{
         }
         ultimaReplica.setComentarioAdmin(replica.getComentarioAdmin());
 
-        if (replica.getEstado() == EstadoSolicitud.radicada || replica.getEstado() == EstadoSolicitud.reabierta){
-            throw new InvalidReplicaConfigurationException("El administrador solo puede cambiar el estado a 'enProceso', 'resuelta' o 'cerrada'. ");
+        if (replica.getEstado() != EstadoSolicitud.resuelta || replica.getEstado() != EstadoSolicitud.cerrada){
+            throw new InvalidReplicaConfigurationException("El administrador solo puede cambiar el estado a 'resuelta' y 'cerrada' cuando responde una replica. ");
         }
         solicitud.setEstado(replica.getEstado());
+        solicitud.setFechaUltimaActualizacion(Instant.now());
 
         return respuestaRepository.save(respuesta);
     }

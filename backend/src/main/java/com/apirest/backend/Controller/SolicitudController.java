@@ -1,10 +1,13 @@
 package com.apirest.backend.Controller;
 
 
+import java.util.List;
+
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.apirest.backend.Model.EvidenciasSolicitud;
 import com.apirest.backend.Model.SolicitudModel;
+import com.apirest.backend.Model.ENUM.EstadoSolicitud;
 import com.apirest.backend.Service.ISolicitudService;
 
 @RestController
@@ -31,6 +35,26 @@ public class SolicitudController {
     @PutMapping("/agregarEvidencia/{id}")
     public ResponseEntity<SolicitudModel> agregarEvidencia(@PathVariable("id") ObjectId idSolicitud, @RequestBody EvidenciasSolicitud evidencia) {
         return new ResponseEntity<SolicitudModel>(solicitudService.agregarEvidencia(idSolicitud, evidencia), HttpStatus.OK);
+    }
+
+    @PutMapping("/actualizarEstadosSolicitudesResueltas")//crearPostman
+    public ResponseEntity<List<SolicitudModel>> actualizarEstadoSolicitudesResueltas() {
+        return new ResponseEntity<List<SolicitudModel>>(solicitudService.actualizarEstadoSolicitudesResueltas() ,HttpStatus.OK);
+    }
+
+    @PutMapping("/estadoEnProceso/{idSolicitud}/{idAdministrador}")//crearPostman
+    public ResponseEntity<SolicitudModel> estadoEnProceso(@PathVariable("idSolicitud") ObjectId idSolicitud,@PathVariable("idAdministrador") ObjectId idAdministrador) {
+        return new ResponseEntity<SolicitudModel>(solicitudService.estadoEnProceso(idSolicitud, idAdministrador) , HttpStatus.OK);
+    }
+
+    @GetMapping("/listarSolicitudes")
+    public ResponseEntity<List<SolicitudModel>> listarTodasSolicitudes() {
+        return new ResponseEntity<List<SolicitudModel>> (solicitudService.listarTodasSolicitudes(),HttpStatus.OK);
+    }
+
+    @GetMapping("/listarSolicitudesPorEstado")
+    public ResponseEntity<List<SolicitudModel>> listarSolicitudesPorEstado(@RequestBody EstadoSolicitud estado) {
+        return new ResponseEntity<List<SolicitudModel>> (solicitudService.listarSolicitudesPorEstado(estado),HttpStatus.OK);
     }
     
 }

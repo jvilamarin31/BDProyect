@@ -35,9 +35,15 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(InvalidReplicaConfigurationException.class)
-    public ResponseEntity<String> handleInvalidUserRoleException(InvalidReplicaConfigurationException ex) {
+    public ResponseEntity<String> handleInvalidReplicaConfigurationException(InvalidReplicaConfigurationException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST); // 400 Bad Request
     }
+
+    @ExceptionHandler(InvalidSolicitudConfigurationException.class)
+    public ResponseEntity<String> handleInvalidSolicitudConfigurationException(InvalidSolicitudConfigurationException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST); // 400 Bad Request
+    }
+    
 
 
     @ExceptionHandler(Exception.class)
