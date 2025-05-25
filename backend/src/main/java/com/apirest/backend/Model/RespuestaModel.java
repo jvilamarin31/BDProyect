@@ -21,7 +21,9 @@ public class RespuestaModel {
     @Id
     @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId solicitudId;
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId usuarioId;
     private String oficioPDF;
     private String comentario;

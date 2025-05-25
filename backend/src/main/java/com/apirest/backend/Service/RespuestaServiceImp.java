@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.apirest.backend.Exception.InvalidReplicaConfigurationException;
+import com.apirest.backend.Exception.InvalidSolicitudConfigurationException;
 import com.apirest.backend.Exception.InvalidUserRoleException;
 import com.apirest.backend.Exception.ResourceNotFoundException;
 import com.apirest.backend.Model.ReplicasRespuesta;
@@ -39,9 +40,8 @@ public class RespuestaServiceImp implements IRespuestaService{
     @Override
     @Transactional
     public RespuestaModel crearRespuesta(RespuestaModel respuesta){
+        //Validación usuario admin
         Optional<UsuarioModel> usuarioExiste = usuarioRepository.findById(respuesta.getUsuarioId());
-        Optional<SolicitudModel> solicitudExiste = solicitudRepository.findById(respuesta.getSolicitudId());
-
         if (!usuarioExiste.isPresent()){
             throw new ResourceNotFoundException("el usuario no existe.");
         }
@@ -50,21 +50,30 @@ public class RespuestaServiceImp implements IRespuestaService{
             throw new InvalidUserRoleException("Solo un administrador puede generar una respuesta.");
         }
 
+        //Validación solicitud
+        Optional<SolicitudModel> solicitudExiste = solicitudRepository.findById(respuesta.getSolicitudId());
         if (!solicitudExiste.isPresent()){
             throw new ResourceNotFoundException("La solicitud no existe.");
-        }
-
-
-        if ((respuesta.getCalificacionUsuario() != null) || (!respuesta.getReplicas().isEmpty() && respuesta.getReplicas() != null)){
-            throw new InvalidUserRoleException("Un administrador no puede calificar ni hacer replicas");
-
         }
         SolicitudModel solicitud = solicitudExiste.get();
         if (solicitud.getUsuario().getNombreCompleto()== "Usuario Anónimo"){
             throw new InvalidUserRoleException("Un administrador no puede responder a una solicitud de un usuario anónimo.");
         }
+
+
+        //Validación del propio documento respuesta
+        if ((respuesta.getCalificacionUsuario() != null) || (!respuesta.getReplicas().isEmpty() && respuesta.getReplicas() != null)){
+            throw new InvalidSolicitudConfigurationException("Un administrador no puede calificar ni hacer replicas");
+        }
+        Optional<RespuestaModel> respuestaExiste = respuestaRepository.findBySolicitudId(respuesta.getSolicitudId());
+        if (respuestaExiste.isPresent()) {
+            throw new InvalidSolicitudConfigurationException("No se puede crear la respuesta, ya que esta solicitud ya fue respondida. ");
+        }
+        
+        
         solicitud.setEstado(EstadoSolicitud.resuelta);
         solicitud.setFechaUltimaActualizacion(Instant.now());
+        solicitudRepository.save(solicitud);
         
         return respuestaRepository.save(respuesta);
     }
@@ -72,7 +81,7 @@ public class RespuestaServiceImp implements IRespuestaService{
     @Override
     @Transactional
     public RespuestaModel crearReplica(ObjectId idRespuesta, ReplicasRespuesta replica) {
-        solicitudService.actualizarEstadoSolicitudesResueltas(); //testear en postman
+        solicitudService.actualizarEstadoSolicitudesResueltas(); 
 
         Optional<RespuestaModel> respuestaExiste = respuestaRepository.findById(idRespuesta);
         if (!respuestaExiste.isPresent()) {
@@ -104,7 +113,7 @@ public class RespuestaServiceImp implements IRespuestaService{
 
         if (respuestaActualizada.getReplicas() != null && !respuestaActualizada.getReplicas().isEmpty()) {
             ReplicasRespuesta ultimaReplica = respuestaActualizada.getReplicas().get(respuestaActualizada.getReplicas().size() - 1);
-            if (ultimaReplica.getComentarioAdmin() != null && !ultimaReplica.getComentarioAdmin().isEmpty()) {
+            if (ultimaReplica.getComentarioAdmin() == null || ultimaReplica.getComentarioAdmin().isEmpty()) {
                 throw new InvalidUserRoleException("El usuario no puede hacer una replica si el administrador no ha respondido.");
             }
         }
@@ -118,6 +127,7 @@ public class RespuestaServiceImp implements IRespuestaService{
 
         respuestaActualizada.getReplicas().add(replica);
         solicitud.setEstado(EstadoSolicitud.reabierta);
+        solicitudRepository.save(solicitud);
         return respuestaRepository.save(respuestaActualizada);
 
     }
@@ -169,11 +179,12 @@ public class RespuestaServiceImp implements IRespuestaService{
         }
         ultimaReplica.setComentarioAdmin(replica.getComentarioAdmin());
 
-        if (replica.getEstado() != EstadoSolicitud.resuelta || replica.getEstado() != EstadoSolicitud.cerrada){
+        if (replica.getEstado() != EstadoSolicitud.resuelta && replica.getEstado() != EstadoSolicitud.cerrada){
             throw new InvalidReplicaConfigurationException("El administrador solo puede cambiar el estado a 'resuelta' y 'cerrada' cuando responde una replica. ");
         }
         solicitud.setEstado(replica.getEstado());
         solicitud.setFechaUltimaActualizacion(Instant.now());
+        solicitudRepository.save(solicitud);
 
         return respuestaRepository.save(respuesta);
     }

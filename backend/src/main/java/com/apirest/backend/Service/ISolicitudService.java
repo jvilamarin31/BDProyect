@@ -12,7 +12,7 @@ import com.apirest.backend.Model.ENUM.EstadoSolicitud;
 public interface ISolicitudService {
     public SolicitudModel crearSolicitud(SolicitudModel solicitud);
     public SolicitudModel agregarEvidencia(ObjectId idSolicitud, EvidenciasSolicitud evidencia);
-    public List<SolicitudModel> actualizarEstadoSolicitudesResueltas(); //falta testear
+    public void actualizarEstadoSolicitudesResueltas(); //falta testear
     public List<SolicitudModel> listarTodasSolicitudes(); //Falta testear
     public List<SolicitudModel> listarSolicitudesPorEstado(EstadoSolicitud estado); //Falta testear
     public SolicitudModel estadoEnProceso(ObjectId idSolicitud, ObjectId idAdministrador); //faltaTestear

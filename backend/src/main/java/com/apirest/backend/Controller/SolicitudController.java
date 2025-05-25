@@ -37,11 +37,6 @@ public class SolicitudController {
         return new ResponseEntity<SolicitudModel>(solicitudService.agregarEvidencia(idSolicitud, evidencia), HttpStatus.OK);
     }
 
-    @PutMapping("/actualizarEstadosSolicitudesResueltas")//crearPostman
-    public ResponseEntity<List<SolicitudModel>> actualizarEstadoSolicitudesResueltas() {
-        return new ResponseEntity<List<SolicitudModel>>(solicitudService.actualizarEstadoSolicitudesResueltas() ,HttpStatus.OK);
-    }
-
     @PutMapping("/estadoEnProceso/{idSolicitud}/{idAdministrador}")//crearPostman
     public ResponseEntity<SolicitudModel> estadoEnProceso(@PathVariable("idSolicitud") ObjectId idSolicitud,@PathVariable("idAdministrador") ObjectId idAdministrador) {
         return new ResponseEntity<SolicitudModel>(solicitudService.estadoEnProceso(idSolicitud, idAdministrador) , HttpStatus.OK);

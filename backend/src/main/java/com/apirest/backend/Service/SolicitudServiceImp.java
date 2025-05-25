@@ -2,7 +2,6 @@ package com.apirest.backend.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,33 +27,37 @@ public class SolicitudServiceImp implements ISolicitudService{
     @Autowired
     ISolicitudRepository solicitudRepository;
 
+
     @Autowired
     IUsuarioRepository usuarioRepository;
 
     @Override
     public SolicitudModel crearSolicitud(SolicitudModel solicitud){
+        //Validación usuario
         Optional<UsuarioModel> usuarioExistente = usuarioRepository.findById(solicitud.getUsuario().getUsuarioId());
         if (!usuarioExistente.isPresent()){
             throw new ResourceNotFoundException("El usuario no existe.");
         }
         UsuarioModel usuario = usuarioExistente.get();
-
         if (usuario.getTipo() == TipoUsuario.administrador){
             throw new InvalidUserRoleException("Un administrador no puede crear una solicitud.");
         }
-
-        solicitud.setFechaHoraCreacion(Instant.now());
-        solicitud.setEstado(EstadoSolicitud.radicada);
-
+        //Anonimo
         if (usuario.getTipo() == TipoUsuario.anonimo){
-
             solicitud.getUsuario().setNombreCompleto(usuario.getNombreCompleto());
         }
 
+        //De la propia solicitud
+        solicitud.setFechaHoraCreacion(Instant.now());
+        solicitud.setEstado(EstadoSolicitud.radicada);
         if (solicitud.getEvidencias() != null && !solicitud.getEvidencias().isEmpty()) {
             for (EvidenciasSolicitud evidencia : solicitud.getEvidencias()) {
                 evidencia.setFechaHora(Instant.now());
             }
+        }
+        Optional<SolicitudModel> solicitudExiste = solicitudRepository.findByUsuarioAndDescripcionDetallada(solicitud.getUsuario(), solicitud.getDescripcionDetallada());
+        if (solicitudExiste.isPresent()) {
+            throw new InvalidSolicitudConfigurationException("El usuario ya tiene creado una solicitud con esa misma descripción. ");
         }
         return solicitudRepository.save(solicitud);
 
@@ -81,35 +84,33 @@ public class SolicitudServiceImp implements ISolicitudService{
 
     @Override
     public List<SolicitudModel> listarTodasSolicitudes() {
+        actualizarEstadoSolicitudesResueltas();
         List<SolicitudModel> solicitudes = solicitudRepository.findAll();
         return solicitudes;
     }
 
     @Override
-    public List<SolicitudModel> listarSolicitudesPorEstado(EstadoSolicitud estado){ 
+    public List<SolicitudModel> listarSolicitudesPorEstado(EstadoSolicitud estado){
+        actualizarEstadoSolicitudesResueltas(); 
         return solicitudRepository.findByEstado(estado);
     }
 
     @Override
     @Transactional
-    public List<SolicitudModel> actualizarEstadoSolicitudesResueltas() {
+    public void actualizarEstadoSolicitudesResueltas() {
         // Buscar solicitudes con estado "resuelta"
         List<SolicitudModel> solicitudesResueltas = solicitudRepository.findByEstado(EstadoSolicitud.resuelta);
-        List<SolicitudModel> solicitudesActualizadas = new ArrayList<>();
         Instant ahora = Instant.now();
         
         for (SolicitudModel solicitud : solicitudesResueltas) {
             // Sumamos 5 días a la fechaUltimaActualizacion de la solicitud
             Instant fechaLimite = solicitud.getFechaUltimaActualizacion().plus(5, ChronoUnit.DAYS);
-            // Si la fecha actual ya sobrepasa el límite, cambiamos el estado a "cerrada"
             if (ahora.isAfter(fechaLimite)) {
                 solicitud.setEstado(EstadoSolicitud.cerrada);
                 solicitud.setFechaUltimaActualizacion(ahora);
                 solicitudRepository.save(solicitud);
-                solicitudesActualizadas.add(solicitud);
             }
         }
-        return solicitudesActualizadas;
     }
 
     @Override

@@ -19,9 +19,13 @@ public class UsuarioServiceImp implements IUsuarioService{
 
     @Override
     public UsuarioModel crearUsuario(UsuarioModel usuario){
-        Optional<UsuarioModel> usuarioExistente = usuarioRepository.findByEmail(usuario.getEmail());
-        if(usuarioExistente.isPresent()) {
+        Optional<UsuarioModel> usuarioEmailExistente = usuarioRepository.findByEmail(usuario.getEmail());
+        if (usuarioEmailExistente.isPresent()) {
             throw new EmailAlreadyExistsException("El correo electrónico ya está registrado.");
+        }
+        Optional<UsuarioModel> usuarioUbicacionExiste = usuarioRepository.findByDireccionUnidad(usuario.getDireccionUnidad());
+        if (usuarioUbicacionExiste.isPresent()) {
+            throw new InvalidUserConfigurationException("La dirección ingresada ya esta registrada por otro usuario. ");
         }
         if (usuario.getTipo()==TipoUsuario.administrador){
             if ((usuario.getRol() != null)||(usuario.getDireccionUnidad()!= null)){
