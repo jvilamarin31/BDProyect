@@ -9,4 +9,5 @@ public interface IRespuestaService {
     public RespuestaModel crearRespuesta(RespuestaModel respuesta);
     public RespuestaModel crearReplica(ObjectId id, ReplicasRespuesta replica);
     public RespuestaModel responderReplica(ObjectId idRespuesta, ReplicasRespuesta replica);
+    public RespuestaModel calificarRespuesta (ObjectId idRespuesta, ObjectId idUsuario,Integer calificacion);
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.apirest.backend.Exception.InvalidReplicaConfigurationException;
+import com.apirest.backend.Exception.InvalidRespuestaConfigurationException;
 import com.apirest.backend.Exception.InvalidSolicitudConfigurationException;
 import com.apirest.backend.Exception.InvalidUserRoleException;
 import com.apirest.backend.Exception.ResourceNotFoundException;
@@ -56,7 +57,7 @@ public class RespuestaServiceImp implements IRespuestaService{
             throw new ResourceNotFoundException("La solicitud no existe.");
         }
         SolicitudModel solicitud = solicitudExiste.get();
-        if (solicitud.getUsuario().getNombreCompleto()== "Usuario Anónimo"){
+        if (solicitud.getUsuario().getNombreCompleto().equals("Usuario Anónimo")){
             throw new InvalidUserRoleException("Un administrador no puede responder a una solicitud de un usuario anónimo.");
         }
 
@@ -186,6 +187,45 @@ public class RespuestaServiceImp implements IRespuestaService{
         solicitud.setFechaUltimaActualizacion(Instant.now());
         solicitudRepository.save(solicitud);
 
+        return respuestaRepository.save(respuesta);
+    }
+
+    @Override
+    @Transactional
+    public RespuestaModel calificarRespuesta (ObjectId idRespuesta, ObjectId idUsuario,Integer calificacion) {
+        //Validacion de respuesta
+        Optional<RespuestaModel> respuestaExiste = respuestaRepository.findById(idRespuesta);
+        if (!respuestaExiste.isPresent()) {
+            throw new ResourceNotFoundException("La respuesta con id: " + idRespuesta + "no existe. ");
+        }
+        RespuestaModel respuesta = respuestaExiste.get();
+
+        //Validación de solicitud
+        Optional<SolicitudModel> solicitudExiste = solicitudRepository.findById(respuesta.getSolicitudId());
+
+        if (!solicitudExiste.isPresent()) {
+            throw new ResourceNotFoundException("La solicitud con id: " + respuesta.getSolicitudId() + "no existe. ");
+        }
+        SolicitudModel solicitud = solicitudExiste.get();
+        
+        if (solicitud.getEstado() != EstadoSolicitud.cerrada) {
+            throw new InvalidRespuestaConfigurationException("Solo se puede calificar una respuesta si el estado de la solicitud se encuentra 'cerrada'");
+        }
+
+        //Validación de usuario
+        Optional<UsuarioModel> usuarioExiste = usuarioRepository.findById(idUsuario);
+        if (!usuarioExiste.isPresent()) {
+            throw new ResourceNotFoundException("El usuario con id: " + idUsuario + "no existe. ");
+        }
+        UsuarioModel usuario = usuarioExiste.get();
+        if (!solicitud.getUsuario().getUsuarioId().equals(usuario.getId())) {
+            throw new InvalidUserRoleException("El usuario que va a calificar la respuesta debe ser el mismo que creo la solicitud. ");
+        }
+        if (respuesta.getCalificacionUsuario()!=null) {
+            throw new InvalidRespuestaConfigurationException("El usuario solo puede calificar la respuesta una sola vez. ");
+        }
+
+        respuesta.setCalificacionUsuario(calificacion);
         return respuestaRepository.save(respuesta);
     }
          

@@ -43,6 +43,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleInvalidSolicitudConfigurationException(InvalidSolicitudConfigurationException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST); // 400 Bad Request
     }
+
+    @ExceptionHandler(InvalidRespuestaConfigurationException.class)
+    public ResponseEntity<String> handleInvalidRespuestaConfigurationException(InvalidRespuestaConfigurationException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST); // 400 Bad Request
+    }
     
 
 

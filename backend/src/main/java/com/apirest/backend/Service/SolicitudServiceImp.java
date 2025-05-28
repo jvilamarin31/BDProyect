@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.apirest.backend.Exception.InvalidRespuestaConfigurationException;
 import com.apirest.backend.Exception.InvalidSolicitudConfigurationException;
 import com.apirest.backend.Exception.InvalidUserRoleException;
 import com.apirest.backend.Exception.ResourceNotFoundException;
@@ -136,8 +137,44 @@ public class SolicitudServiceImp implements ISolicitudService{
             throw new InvalidUserRoleException("Solo un administrador podra cambiar el estado a 'enProceso'. ");
         }
 
+        solicitud.setFechaUltimaActualizacion(Instant.now());
         solicitud.setEstado(EstadoSolicitud.enProceso);
         return solicitudRepository.save(solicitud);
         
     } 
+
+    @Override
+    @Transactional
+    public SolicitudModel cambiarEstadoSolicitudParaUnAnonimo (ObjectId idSolicitud, ObjectId idAdministrador, EstadoSolicitud estado) {
+        //Validaciones de solicitud
+        Optional<SolicitudModel> solicitudExiste = solicitudRepository.findById(idSolicitud);
+        if (!solicitudExiste.isPresent()) {
+            throw new ResourceNotFoundException("La solicitud con id: "+ idSolicitud + " no existe. ");
+        }
+        SolicitudModel solicitud = solicitudExiste.get();
+        if (!solicitud.getUsuario().getNombreCompleto().equals("Usuario Anónimo") ){
+            throw new InvalidRespuestaConfigurationException("Este metodo solo es para cambiar el estado de solicitud de un anonimo. ");
+        }
+
+        //Validaciones admin
+        Optional<UsuarioModel> usuarioExiste = usuarioRepository.findById(idAdministrador);
+        if (!usuarioExiste.isPresent()) {
+            throw new ResourceNotFoundException("El id: "+ idAdministrador + " no corresponde a ningun usuario. ");
+        }
+        UsuarioModel administrador = usuarioExiste.get();
+        if (administrador.getTipo() != TipoUsuario.administrador) {
+            throw new InvalidUserRoleException("Solo un administrador puede cambiar el estado de la solicitud. ");
+        }
+        if (estado == EstadoSolicitud.radicada || estado == EstadoSolicitud.reabierta) {
+            throw new InvalidSolicitudConfigurationException("Un administrador no puede cambiar el estado a 'radicada' o 'reabierta'");
+        }
+        if (solicitud.getEstado() == EstadoSolicitud.resuelta && estado == EstadoSolicitud.enProceso) {
+            throw new InvalidSolicitudConfigurationException("Si la solicitud ya esta en 'resuelta' entonces solo se puede cambiar a 'cerrada'. ");
+        }
+        if (solicitud.getEstado() == EstadoSolicitud.cerrada) {
+            throw new InvalidSolicitudConfigurationException("Si la solicitud ya se encuentra en estado cerrada, entonces ya no se le puede cambiar el estado. ");
+        } 
+        solicitud.setEstado(estado);
+        return solicitudRepository.save(solicitud);
+    }
 }

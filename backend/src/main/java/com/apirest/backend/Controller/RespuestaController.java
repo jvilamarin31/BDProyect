@@ -35,4 +35,9 @@ public class RespuestaController {
     public ResponseEntity<RespuestaModel> responderReplica(@PathVariable("idRespuesta") ObjectId idRespuesta, @RequestBody ReplicasRespuesta replica){
         return new ResponseEntity<RespuestaModel> (respuestaService.responderReplica(idRespuesta, replica),HttpStatus.OK);
     }
+
+    @PutMapping("/calificarRespuesta/{idRespuesta}/{idUsuario}")
+    public ResponseEntity<RespuestaModel> crearCalificacion(@PathVariable("idRespuesta") ObjectId idRespuesta,@PathVariable("idUsuario") ObjectId idUsuario,@RequestBody Integer calificacion) {
+        return new ResponseEntity<RespuestaModel> (respuestaService.calificarRespuesta(idRespuesta, idUsuario, calificacion),HttpStatus.OK);
+    }
 }

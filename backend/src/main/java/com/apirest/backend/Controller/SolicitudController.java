@@ -52,4 +52,8 @@ public class SolicitudController {
         return new ResponseEntity<List<SolicitudModel>> (solicitudService.listarSolicitudesPorEstado(estado),HttpStatus.OK);
     }
     
+    @PutMapping("/cambiarEstadoParaUnAnonimo/{idSolicitud}/{idAdministrador}")
+    public ResponseEntity<SolicitudModel> cambiarEstadoSolicitudParaUnAnonimo (@PathVariable("idSolicitud") ObjectId idSolicitud,@PathVariable("idAdministrador") ObjectId idAdministrador,@RequestBody EstadoSolicitud estado) {
+        return new ResponseEntity<SolicitudModel> (solicitudService.cambiarEstadoSolicitudParaUnAnonimo(idSolicitud, idAdministrador, estado),HttpStatus.OK);
+    }
 }

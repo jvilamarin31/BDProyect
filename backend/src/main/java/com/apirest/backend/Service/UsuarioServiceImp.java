@@ -23,10 +23,7 @@ public class UsuarioServiceImp implements IUsuarioService{
         if (usuarioEmailExistente.isPresent()) {
             throw new EmailAlreadyExistsException("El correo electrónico ya está registrado.");
         }
-        Optional<UsuarioModel> usuarioUbicacionExiste = usuarioRepository.findByDireccionUnidad(usuario.getDireccionUnidad());
-        if (usuarioUbicacionExiste.isPresent()) {
-            throw new InvalidUserConfigurationException("La dirección ingresada ya esta registrada por otro usuario. ");
-        }
+        
         if (usuario.getTipo()==TipoUsuario.administrador){
             if ((usuario.getRol() != null)||(usuario.getDireccionUnidad()!= null)){
                 throw new InvalidUserConfigurationException("Un administrador no puede tener rol ni dirección de unidad.");
@@ -34,6 +31,10 @@ public class UsuarioServiceImp implements IUsuarioService{
         } else if (usuario.getTipo()==TipoUsuario.usuario){
             if ((usuario.getRol() == null)||(usuario.getDireccionUnidad() == null)){
                 throw new InvalidUserConfigurationException("Un usuario registrado debe tener rol y dirección de unidad.");
+            }
+            Optional<UsuarioModel> usuarioUbicacionExiste = usuarioRepository.findByDireccionUnidad(usuario.getDireccionUnidad());
+            if (usuarioUbicacionExiste.isPresent()) {
+                throw new InvalidUserConfigurationException("La dirección ingresada ya esta registrada por otro usuario. ");
             }
         } else if (usuario.getTipo()==TipoUsuario.anonimo){
             throw new InvalidUserConfigurationException("Un usuario no puede crear un usuario anónimo, para eso podra usar el usuario anonimo ya creado por defecto.");
