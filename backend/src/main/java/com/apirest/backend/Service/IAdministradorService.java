@@ -8,4 +8,5 @@ import com.apirest.backend.Model.PeriodosAdministradores;
 public interface IAdministradorService {
     public AdministradorModel crearAdministradores(AdministradorModel administradores);
     public AdministradorModel modificarPeriodoAdministrador(ObjectId idAdministradorPeriodo, PeriodosAdministradores periodo);
+    public void actualizarEstadosAdministradores();
 }

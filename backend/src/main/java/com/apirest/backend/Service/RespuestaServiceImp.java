@@ -44,6 +44,9 @@ public class RespuestaServiceImp implements IRespuestaService{
     @Autowired
     IAdministradorRepository administradorRepository;
 
+    @Autowired
+    IAdministradorService administradoresRepository;
+
     @Override
     @Transactional
     public RespuestaModel crearRespuesta(RespuestaModel respuesta){
@@ -56,6 +59,7 @@ public class RespuestaServiceImp implements IRespuestaService{
         if (administrador.getTipo() != TipoUsuario.administrador){
             throw new InvalidUserRoleException("Solo un administrador puede generar una respuesta.");
         }
+        administradoresRepository.actualizarEstadosAdministradores();
         Optional<AdministradorModel> periodoAdministradorExiste = administradorRepository.findById(administrador.getId());
         if (!periodoAdministradorExiste.isPresent()) {
             throw new ResourceNotFoundException("El administrador no tiene periodo. Así que no se puede validar su estado. ");
@@ -199,6 +203,7 @@ public class RespuestaServiceImp implements IRespuestaService{
         if (!respuesta.getUsuarioId().equals(replica.getUsuarioId())) {
             throw new InvalidUserRoleException("Solo el mismo administrador que creo la respuesta puede responder las replicas");
         }
+        administradoresRepository.actualizarEstadosAdministradores();
         Optional<AdministradorModel> periodoAdministradorExiste = administradorRepository.findById(replica.getUsuarioId());
         if (!periodoAdministradorExiste.isPresent()) {
             throw new ResourceNotFoundException("El administrador no tiene periodo. Así que no se puede validar su estado.");

@@ -1,5 +1,7 @@
 package com.apirest.backend.Service;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import org.bson.types.ObjectId;
@@ -46,7 +48,7 @@ public class AdministradorServiceImp implements IAdministradorService{
         if (periodoAdministradorExiste.isPresent()) {
             throw new InvalidPeriodoAdministradoresConfigurationException("Ya existe un periodo administrador con ese usuario administrador. ");
         }
-        
+        actualizarEstadosAdministradores();
         return administradoresRepository.save(administradores);
         
     }
@@ -70,15 +72,31 @@ public class AdministradorServiceImp implements IAdministradorService{
                 throw new InvalidPeriodoAdministradoresConfigurationException("La fecha de  incio del nuevo periodo debe ser despues de la fecha fin del anterior periodo. ");
             }
         }
-        if (administradorActualizar.getEstado()==EstadoAdministradores.activo) {
-            administradorActualizar.setEstado(EstadoAdministradores.inactivo);
-        } else {
-            administradorActualizar.setEstado(EstadoAdministradores.activo);
-        }
+
         administradorActualizar.getPeriodos().add(periodo);
+        actualizarEstadosAdministradores();
         return administradoresRepository.save(administradorActualizar);
         
     }
+
+    @Override
+    @Transactional
+    public void actualizarEstadosAdministradores() {
+        List<AdministradorModel> administradores = administradoresRepository.findAll();
+        Instant ahora = Instant.now();
+
+        for (AdministradorModel admin : administradores) {
+            PeriodosAdministradores ultimoPeriodo = admin.getPeriodos().get(admin.getPeriodos().size() - 1);
+            if ((!ahora.isBefore(ultimoPeriodo.getFechaInicio())) && (!ahora.isAfter(ultimoPeriodo.getFechaFin()))) {
+                admin.setEstado(EstadoAdministradores.activo);
+            } else {
+                admin.setEstado(EstadoAdministradores.inactivo);
+            }
+        }
+        administradoresRepository.saveAll(administradores);
+    }
+
+   
 
             
 }
