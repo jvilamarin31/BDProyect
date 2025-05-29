@@ -32,6 +32,7 @@ public class AdministradorServiceImp implements IAdministradorService{
     
 
     @Override
+    @Transactional
     public AdministradorModel crearAdministradores(AdministradorModel administradores){
 
         //Validaciones del admin 
@@ -48,7 +49,16 @@ public class AdministradorServiceImp implements IAdministradorService{
         if (periodoAdministradorExiste.isPresent()) {
             throw new InvalidPeriodoAdministradoresConfigurationException("Ya existe un periodo administrador con ese usuario administrador. ");
         }
-        actualizarEstadosAdministradores();
+        
+        PeriodosAdministradores ultimoPeriodo = administradores.getPeriodos().get(administradores.getPeriodos().size() - 1);
+        Instant ahora = Instant.now();
+        
+        if ((!ahora.isBefore(ultimoPeriodo.getFechaInicio())) && (!ahora.isAfter(ultimoPeriodo.getFechaFin()))) {
+            administradores.setEstado(EstadoAdministradores.activo);
+        } else {
+            administradores.setEstado(EstadoAdministradores.inactivo);
+        }
+
         return administradoresRepository.save(administradores);
         
     }
