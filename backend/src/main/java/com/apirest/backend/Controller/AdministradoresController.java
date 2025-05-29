@@ -1,9 +1,12 @@
 package com.apirest.backend.Controller;
 
+import java.util.List;
+
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -30,6 +33,11 @@ public class AdministradoresController {
     @PutMapping("/modificarAcuerdo/{idAdministradorPeriodo}")
     public ResponseEntity<AdministradorModel> modificarPeriodoAdministrador(@PathVariable("idAdministradorPeriodo") ObjectId idAdministradorPeriodo,@RequestBody PeriodosAdministradores periodo) {
         return new ResponseEntity<AdministradorModel>(administradoresService.modificarPeriodoAdministrador(idAdministradorPeriodo, periodo),HttpStatus.OK);
+    }
+
+    @GetMapping("/listarPeriodosDeTodosAdmins")
+    public ResponseEntity<List<AdministradorModel>> listarPeridosDeAdministradores() {
+        return new ResponseEntity<List<AdministradorModel>> (administradoresService.listarPeridosDeAdministradores(),HttpStatus.OK);
     }
     
 }

@@ -106,7 +106,12 @@ public class AdministradorServiceImp implements IAdministradorService{
         administradoresRepository.saveAll(administradores);
     }
 
-   
-
+    @Override
+    @Transactional
+    public List<AdministradorModel> listarPeridosDeAdministradores() {
+        actualizarEstadosAdministradores();
+        List<AdministradorModel> periodos =administradoresRepository.findAll();
+        return periodos;
+    }
             
 }
