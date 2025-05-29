@@ -195,10 +195,6 @@ public class RespuestaServiceImp implements IRespuestaService{
         if (!usuarioExiste.isPresent()) {
             throw new ResourceNotFoundException("El usuario no existe.");
         }
-        // UsuarioModel usuario = usuarioExiste.get();
-        // if (usuario.getTipo() != TipoUsuario.administrador) {
-        //     throw new InvalidUserRoleException("Solo un administrador puede responder a una replica.");
-        // } Este metodo es por si cambiamos de idea y queremos que cualquier admin pueda responder las replicas
 
         if (!respuesta.getUsuarioId().equals(replica.getUsuarioId())) {
             throw new InvalidUserRoleException("Solo el mismo administrador que creo la respuesta puede responder las replicas");
@@ -216,6 +212,8 @@ public class RespuestaServiceImp implements IRespuestaService{
         if (replica.getEstado() != EstadoSolicitud.resuelta && replica.getEstado() != EstadoSolicitud.cerrada){
             throw new InvalidReplicaConfigurationException("El administrador solo puede cambiar el estado a 'resuelta' y 'cerrada' cuando responde una replica. ");
         }
+        
+        ultimaReplica.setComentarioAdmin(replica.getComentarioAdmin());
         solicitud.setEstado(replica.getEstado());
         solicitud.setFechaUltimaActualizacion(Instant.now());
         solicitudRepository.save(solicitud);
