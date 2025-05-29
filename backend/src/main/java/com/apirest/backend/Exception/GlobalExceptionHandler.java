@@ -48,8 +48,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleInvalidRespuestaConfigurationException(InvalidRespuestaConfigurationException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST); // 400 Bad Request
     }
-    
 
+    @ExceptionHandler(InvalidPeriodoAdministradoresConfigurationException.class)
+    public ResponseEntity<String> handleInvalidPeriodoAdministradoresConfigurationException(InvalidPeriodoAdministradoresConfigurationException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST); // 400 Bad Request
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {

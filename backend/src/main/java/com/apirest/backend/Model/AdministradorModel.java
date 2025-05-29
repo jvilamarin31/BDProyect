@@ -26,5 +26,5 @@ public class AdministradorModel {
     @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId idAdministrador;
     private EstadoAdministradores estado;
-    private ArrayList<PeriodosAdministradores> periodos = new ArrayList<>();
+    private ArrayList<PeriodosAdministradores> periodos = new ArrayList<PeriodosAdministradores>();
 }
