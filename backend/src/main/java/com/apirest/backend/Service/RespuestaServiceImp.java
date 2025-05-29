@@ -66,6 +66,9 @@ public class RespuestaServiceImp implements IRespuestaService{
         if ((respuesta.getCalificacionUsuario() != null) || (!respuesta.getReplicas().isEmpty() && respuesta.getReplicas() != null)){
             throw new InvalidSolicitudConfigurationException("Un administrador no puede calificar ni hacer replicas");
         }
+        if (respuesta.getComentario().isBlank()) {
+            throw new InvalidRespuestaConfigurationException("El comentario por parte del administrador es obligatorio, no se puede enviar vacio. ");
+        }
         Optional<RespuestaModel> respuestaExiste = respuestaRepository.findBySolicitudId(respuesta.getSolicitudId());
         if (respuestaExiste.isPresent()) {
             throw new InvalidSolicitudConfigurationException("No se puede crear la respuesta, ya que esta solicitud ya fue respondida. ");
@@ -108,6 +111,10 @@ public class RespuestaServiceImp implements IRespuestaService{
             throw new InvalidUserRoleException("Solo el usuario que hizo la solicitud puede hacer una replica.");
         }
 
+        //Validaciones de los atributos enviados en la replica
+        if (replica.getJustificacionReaperturaUsuario().isBlank()) {
+            throw new InvalidReplicaConfigurationException("No se puede enviar la justificacion de reapertura vacio. ");
+        }
         if (replica.getComentarioAdmin() != null) {
             throw new InvalidUserRoleException("Un usuario no puede hacer un comentario de administrador.");
         }

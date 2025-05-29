@@ -23,6 +23,10 @@ public class UsuarioServiceImp implements IUsuarioService{
         if (usuarioEmailExistente.isPresent()) {
             throw new EmailAlreadyExistsException("El correo electrónico ya está registrado.");
         }
+        //Validacion de que no se envian datos que son requeridos, vacios
+        if (usuario.getNombreCompleto().isBlank() || usuario.getTipoDocumento().isBlank() || usuario.getNumeroDocumento() == 0 || usuario.getEmail().isBlank() || usuario.getTelefono() == 0) {
+            throw new InvalidUserConfigurationException("No se pueden enviar vacios los datos requeridos de la bd");
+        }
         
         if (usuario.getTipo()==TipoUsuario.administrador){
             if ((usuario.getRol() != null)||(usuario.getDireccionUnidad()!= null)){
@@ -39,7 +43,7 @@ public class UsuarioServiceImp implements IUsuarioService{
         } else if (usuario.getTipo()==TipoUsuario.anonimo){
             throw new InvalidUserConfigurationException("Un usuario no puede crear un usuario anónimo, para eso podra usar el usuario anonimo ya creado por defecto.");
         }//Validación para anonimo
-        if (usuario.getNombreCompleto()=="Usuario Anónimo") {
+        if (usuario.getNombreCompleto()=="Usuario Anónimo" || usuario.getNombreCompleto()=="Usuario Anonimo") {
             throw new InvalidUserConfigurationException("El nombre completo no puede ser 'Usuario Anónimo', ese nombre ya esta reservado para el usuario anonimo por defecto.");  
         }//Validación para anonimo
          

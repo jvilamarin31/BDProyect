@@ -34,6 +34,11 @@ public class SolicitudServiceImp implements ISolicitudService{
 
     @Override
     public SolicitudModel crearSolicitud(SolicitudModel solicitud){
+        //Validación de no enviar los datos requeridos, vacios
+        if (solicitud.getDescripcionDetallada().isBlank()) {
+            throw new InvalidSolicitudConfigurationException("No se pueden enviar la descripción detallada vacia. ");
+        }
+
         //Validación usuario
         Optional<UsuarioModel> usuarioExistente = usuarioRepository.findById(solicitud.getUsuario().getUsuarioId());
         if (!usuarioExistente.isPresent()){
@@ -48,7 +53,7 @@ public class SolicitudServiceImp implements ISolicitudService{
             solicitud.getUsuario().setNombreCompleto(usuario.getNombreCompleto());
         }
 
-        //De la propia solicitud
+        //Los atributos que al crearse el propio sistema les asignara el valor
         solicitud.setFechaHoraCreacion(Instant.now());
         solicitud.setEstado(EstadoSolicitud.radicada);
         if (solicitud.getEvidencias() != null && !solicitud.getEvidencias().isEmpty()) {
@@ -58,7 +63,7 @@ public class SolicitudServiceImp implements ISolicitudService{
         }
         Optional<SolicitudModel> solicitudExiste = solicitudRepository.findByUsuarioAndDescripcionDetallada(solicitud.getUsuario(), solicitud.getDescripcionDetallada());
         if (solicitudExiste.isPresent()) {
-            throw new InvalidSolicitudConfigurationException("El usuario ya tiene creado una solicitud con esa misma descripción. ");
+            throw new InvalidSolicitudConfigurationException("El usuario ya tiene creado una solicitud con esa misma descripción detallada. ");
         }
         return solicitudRepository.save(solicitud);
 
