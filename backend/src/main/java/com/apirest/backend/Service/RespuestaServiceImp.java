@@ -14,12 +14,15 @@ import com.apirest.backend.Exception.InvalidRespuestaConfigurationException;
 import com.apirest.backend.Exception.InvalidSolicitudConfigurationException;
 import com.apirest.backend.Exception.InvalidUserRoleException;
 import com.apirest.backend.Exception.ResourceNotFoundException;
+import com.apirest.backend.Model.AdministradorModel;
 import com.apirest.backend.Model.ReplicasRespuesta;
 import com.apirest.backend.Model.RespuestaModel;
 import com.apirest.backend.Model.SolicitudModel;
 import com.apirest.backend.Model.UsuarioModel;
+import com.apirest.backend.Model.ENUM.EstadoAdministradores;
 import com.apirest.backend.Model.ENUM.EstadoSolicitud;
 import com.apirest.backend.Model.ENUM.TipoUsuario;
+import com.apirest.backend.Repository.IAdministradorRepository;
 import com.apirest.backend.Repository.IRespuestaRepository;
 import com.apirest.backend.Repository.ISolicitudRepository;
 import com.apirest.backend.Repository.IUsuarioRepository;
@@ -38,6 +41,9 @@ public class RespuestaServiceImp implements IRespuestaService{
     @Autowired
     ISolicitudService solicitudService;
 
+    @Autowired
+    IAdministradorRepository administradorRepository;
+
     @Override
     @Transactional
     public RespuestaModel crearRespuesta(RespuestaModel respuesta){
@@ -49,6 +55,14 @@ public class RespuestaServiceImp implements IRespuestaService{
         UsuarioModel administrador = usuarioExiste.get(); 
         if (administrador.getTipo() != TipoUsuario.administrador){
             throw new InvalidUserRoleException("Solo un administrador puede generar una respuesta.");
+        }
+        Optional<AdministradorModel> periodoAdministradorExiste = administradorRepository.findById(administrador.getId());
+        if (!periodoAdministradorExiste.isPresent()) {
+            throw new ResourceNotFoundException("El administrador no tiene periodo. Así que no se puede validar su estado. ");
+        }
+        AdministradorModel estadoAdministrador = periodoAdministradorExiste.get();
+        if (estadoAdministrador.getEstado()!=EstadoAdministradores.activo) {
+            throw new InvalidRespuestaConfigurationException("Solo un administrador en estado 'activo' puede responder una solicitud. ");
         }
 
         //Validación solicitud
@@ -185,7 +199,14 @@ public class RespuestaServiceImp implements IRespuestaService{
         if (!respuesta.getUsuarioId().equals(replica.getUsuarioId())) {
             throw new InvalidUserRoleException("Solo el mismo administrador que creo la respuesta puede responder las replicas");
         }
-        ultimaReplica.setComentarioAdmin(replica.getComentarioAdmin());
+        Optional<AdministradorModel> periodoAdministradorExiste = administradorRepository.findById(replica.getUsuarioId());
+        if (!periodoAdministradorExiste.isPresent()) {
+            throw new ResourceNotFoundException("El administrador no tiene periodo. Así que no se puede validar su estado.");
+        }
+        AdministradorModel estadoAdministrador = periodoAdministradorExiste.get();
+        if (estadoAdministrador.getEstado()!=EstadoAdministradores.activo) {
+            throw new InvalidRespuestaConfigurationException("Solo un administrador en estado 'activo' puede responder una replica. ");
+        }
 
         if (replica.getEstado() != EstadoSolicitud.resuelta && replica.getEstado() != EstadoSolicitud.cerrada){
             throw new InvalidReplicaConfigurationException("El administrador solo puede cambiar el estado a 'resuelta' y 'cerrada' cuando responde una replica. ");
